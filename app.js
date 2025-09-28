@@ -1,7 +1,7 @@
 // Configuración de Supabase
 const supabase = supabase.createClient(
   'https://TU_PROYECTO.supabase.co',
-  'TU_API_KEY'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidGV6YnhtcmdiY2dtdW5mcG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MzAyMDAsImV4cCI6MjA3NDUwNjIwMH0.OJotxjLi-7xnbIZat-JKQd-7bn5QMvqNsysPYU0GEsY'
 );
 
 let currentUser = null;
