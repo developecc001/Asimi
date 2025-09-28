@@ -1,43 +1,84 @@
 <!doctype html>
 <html lang="es">
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Silver — Feed + Likes + Realtime + Avatares</title>
-  <link rel="stylesheet" href="styles.css" />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Asimi — Feed + Likes + Realtime + Avatares</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
   <body>
-    <h3>Asimi</h3>
+    <header class="topbar">
+      <h3>Asimi</h3>
+      <div class="row">
+        <label>Email: <input id="email" placeholder="tu@email.com" /></label>
+        <label>Password: <input id="password" type="password" placeholder="••••••••" /></label>
+        <button id="login"   class="btn">Login</button>
+        <button id="signup"  class="btn alt">Crear cuenta</button>
+        <button id="reset"   class="btn ghost">Olvidé mi contraseña</button>
+        <button id="logout"  class="btn ghost" style="display:none">Salir</button>
+        <button id="openProfile" class="btn ghost">Perfil</button>
+        <label class="row">
+          <input type="checkbox" id="debugToggle" />
+          <span class="meta">Debug</span>
+        </label>
+      </div>
+    </header>
 
-    <div class="row mb">
-      <label>Email: <input id="email" value="TU_EMAIL@ejemplo.com" /></label>
-      <label>Password: <input id="password" type="password" value="TU_PASSWORD" /></label>
+    <main class="container">
+      <!-- Publicar -->
+      <section class="card row gap">
+        <input id="newPost" placeholder="¿Qué estás pensando?" size="50" />
+        <button id="publish" class="btn">Publicar</button>
+        <span id="activeHint" class="pill">sin selección</span>
+      </section>
+
+      <!-- Acciones de post -->
+      <section class="row gap mb">
+        <button id="toggle" class="btn" disabled>Me gusta</button>
+        <button id="listComments" class="btn" disabled>Ver comentarios</button>
+        <button id="refresh" class="btn ghost">Refrescar feed</button>
+      </section>
+
+      <!-- Feed y comentarios -->
+      <div id="feedUI" class="feed"></div>
+
+      <div class="row card gap mt">
+        <input id="commentText" placeholder="Escribí un comentario..." size="50" />
+        <button id="addComment" class="btn" disabled>Comentar</button>
+      </div>
+
+      <div id="commentsUI" class="commentList"></div>
+
+      <div style="display:flex;justify-content:center;margin-top:16px">
+        <button id="loadMore" class="btn ghost">Cargar más</button>
+      </div>
+    </main>
+
+    <!-- Perfil (modal simple) -->
+    <div id="profileModal" class="modal" hidden>
+      <div class="modal-card">
+        <div class="modal-head">
+          <h4>Tu perfil</h4>
+          <button id="closeProfile" class="btn ghost">✕</button>
+        </div>
+        <div class="modal-body">
+          <label>Usuario: <input id="profUsername" placeholder="tu usuario" /></label>
+          <div class="row mt">
+            <input id="avatarFile2" type="file" accept="image/*" />
+            <button id="saveProfile" class="btn">Guardar</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="row mb">
-      <button id="login" class="btn">Login</button>
-      <button id="toggle" class="btn" disabled>Me gusta</button>
-      <button id="refresh" class="btn">Refrescar feed</button>
-      <span id="activeHint" class="pill" title="Post seleccionado">sin selección</span>
-      <label class="row right">
-        <input type="checkbox" id="debugToggle" />
-        <span>Modo debug</span>
-      </label>
-    </div>
-
-    <div class="row card gap">
-      <input id="commentText" placeholder="Escribí un comentario..." size="40" />
-      <button id="addComment" class="btn" disabled>Agregar comentario</button>
-      <button id="listComments" class="btn" disabled>Ver últimos comentarios</button>
-    </div>
-
-    <div class="row card gap mt">
+    <!-- Avatares rápidos -->
+    <section class="row card gap mt">
       <input id="avatarFile" type="file" accept="image/*" />
       <button id="uploadAvatar" class="btn">Subir avatar</button>
-      <button id="showAvatar" class="btn">Ver avatar</button>
-    </div>
+      <button id="showAvatar" class="btn ghost">Ver avatar</button>
+    </section>
 
-    <div id="feedUI" class="feed"></div>
-    <div id="commentsUI" class="commentList"></div>
-
+    <!-- Debug + Toasts -->
     <div id="debugWrap"><pre id="out"></pre></div>
     <div id="toasts"></div>
 
