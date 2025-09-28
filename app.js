@@ -1,6 +1,6 @@
 // Inicializar Supabase
-const SUPABASE_URL = "https://pbtezbxmrgbcgmunfpns.supabase.co"; // <-- reemplazá esto
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidGV6YnhtcmdiY2dtdW5mcG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MzAyMDAsImV4cCI6MjA3NDUwNjIwMH0.OJotxjLi-7xnbIZat-JKQd-7bn5QMvqNsysPYU0GEsY";         // <-- y esto
+const SUPABASE_URL = "https://pbtezbxmrgbcgmunfpns.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidGV6YnhtcmdiY2dtdW5mcG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MzAyMDAsImV4cCI6MjA3NDUwNjIwMH0.OJotxjLi-7xnbIZat-JKQd-7bn5QMvqNsysPYU0GEsY";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Elementos del DOM
@@ -11,27 +11,6 @@ const newPostInput = document.getElementById("new-post");
 const charCount = document.getElementById("char-count");
 const authError = document.getElementById("auth-error");
 
-// Detectar si viene desde el email de confirmación
-window.addEventListener("DOMContentLoaded", async () => {
-  const url = new URL(window.location.href);
-  const hashParams = new URLSearchParams(url.hash.substring(1));
-
-  const accessToken = hashParams.get("access_token");
-  const refreshToken = hashParams.get("refresh_token");
-  const type = hashParams.get("type");
-
-  if (accessToken && refreshToken && type === "signup") {
-    await client.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
-
-    authSection.classList.add("hidden");
-    postSection.classList.remove("hidden");
-    loadPosts();
-  }
-});
-
 // Login
 async function login() {
   const email = document.getElementById("email").value;
@@ -40,7 +19,7 @@ async function login() {
   const { data, error } = await client.auth.signInWithPassword({ email, password });
 
   if (error) {
-    authError.innerText = "Login inválido";
+    authError.innerText = "Login inválido: " + error.message;
     authError.classList.remove("hidden");
   } else {
     authError.classList.add("hidden");
@@ -55,7 +34,13 @@ async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await client.auth.signUp({ email, password });
+  const { data, error } = await client.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: "https://developecc001.github.io/Asimi/" // GitHub Pages de tu app
+    }
+  });
 
   if (error) {
     authError.innerText = "Error en registro: " + error.message;
@@ -73,15 +58,14 @@ async function createPost() {
 
   const session = await client.auth.getSession();
   const user = session.data.session?.user;
+
   if (!user) return;
 
-  await client.from("posts").insert([
-    {
-      content,
-      user_id: user.id,
-      user_email: user.email,
-    },
-  ]);
+  await client.from("posts").insert([{
+    content,
+    user_id: user.id,
+    user_email: user.email
+  }]);
 
   newPostInput.value = "";
   updateCharCount();
@@ -95,10 +79,13 @@ async function loadPosts() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) return console.error(error);
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   feed.innerHTML = "";
-  posts.forEach((post) => {
+  posts.forEach(post => {
     const el = document.createElement("div");
     el.className = "bg-white p-4 rounded shadow mb-3";
     el.innerHTML = `
@@ -114,4 +101,15 @@ async function loadPosts() {
 function updateCharCount() {
   charCount.innerText = `${newPostInput.value.length} / 280`;
 }
+
 newPostInput?.addEventListener("input", updateCharCount);
+
+// Si ya está logueado, mostrar sección de post
+(async () => {
+  const { data } = await client.auth.getSession();
+  if (data.session) {
+    authSection.classList.add("hidden");
+    postSection.classList.remove("hidden");
+    loadPosts();
+  }
+})();
