@@ -1,134 +1,54 @@
-// Configuración de Supabase
-const SUPABASE_URL = 'https://pbtezbxmrgbcgmunfpns.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // tu key completa aquí
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Asimi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind CDN (dev only) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col items-center">
 
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <div class="w-full max-w-md mt-10">
 
-// Elementos del DOM
-const authSection = document.getElementById("auth-section");
-const postSection = document.getElementById("post-section");
-const feed = document.getElementById("feed");
-const newPostInput = document.getElementById("new-post");
-const charCount = document.getElementById("char-count");
-const authError = document.getElementById("auth-error");
+    <!-- 🔐 Login / Registro -->
+    <div id="auth-section" class="bg-white p-6 rounded shadow">
+      <h2 class="text-2xl font-bold mb-4 text-center">Ingresar o Registrarse</h2>
+      <input id="email" type="email" placeholder="Email" class="w-full p-2 border rounded mb-3" />
+      <input id="password" type="password" placeholder="Contraseña" class="w-full p-2 border rounded mb-3" />
 
-// Mostrar u ocultar secciones según sesión
-async function checkSession() {
-  const { data: { session } } = await client.auth.getSession();
+      <div class="flex justify-between">
+        <button onclick="login()" class="bg-blue-600 text-white px-4 py-2 rounded">Login</button>
+        <button onclick="register()" class="bg-gray-500 text-white px-4 py-2 rounded">Registro</button>
+      </div>
 
-  if (session && session.user) {
-    authSection.classList.add("hidden");
-    postSection.classList.remove("hidden");
-    loadPosts();
-    setupRealtime();
-  } else {
-    authSection.classList.remove("hidden");
-    postSection.classList.add("hidden");
-  }
-}
+      <p id="auth-error" class="text-red-600 mt-3 hidden"></p>
+    </div>
 
-// Login
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+    <!-- 📝 Publicar + Feed -->
+    <div id="post-section" class="bg-white p-6 rounded shadow hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Asimi</h2>
+        <button id="logout-btn" onclick="logout()" class="text-sm text-red-500 hidden">Salir</button>
+      </div>
 
-  const { error } = await client.auth.signInWithPassword({ email, password });
+      <textarea id="new-post" rows="3" maxlength="280" placeholder="¿Qué estás pensando?"
+        class="w-full p-2 border rounded mb-2 resize-none"></textarea>
 
-  if (error) {
-    authError.innerText = "Login inválido: " + error.message;
-    authError.classList.remove("hidden");
-  } else {
-    authError.classList.add("hidden");
-    await checkSession();
-  }
-}
+      <div class="flex justify-between items-center mb-3">
+        <span id="char-count" class="text-sm text-gray-500">0 / 280</span>
+        <button onclick="createPost()" class="bg-blue-600 text-white px-4 py-1 rounded">Publicar</button>
+      </div>
 
-// Registro
-async function register() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+      <hr class="my-4" />
+      <div id="feed" class="space-y-4"></div>
+    </div>
 
-  const { error } = await client.auth.signUp({ email, password });
+  </div>
 
-  if (error) {
-    authError.innerText = "Error en registro: " + error.message;
-  } else {
-    authError.innerText = "✅ Registrado. Revisa tu email para confirmar.";
-  }
-
-  authError.classList.remove("hidden");
-}
-
-// Publicar
-async function createPost() {
-  const content = newPostInput.value.trim();
-  if (!content) return;
-
-  const { data: { session } } = await client.auth.getSession();
-  const user = session?.user;
-  if (!user) return;
-
-  const { error } = await client.from("posts").insert([{
-    content,
-    user_id: user.id,
-    user_email: user.email
-  }]);
-
-  if (!error) {
-    newPostInput.value = "";
-    updateCharCount();
-    // Post se agrega automáticamente por realtime
-  }
-}
-
-// Cargar posts
-async function loadPosts() {
-  const { data: posts, error } = await client
-    .from("posts")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error al cargar posts:", error.message);
-    return;
-  }
-
-  renderFeed(posts);
-}
-
-// Mostrar posts en el DOM
-function renderFeed(posts) {
-  feed.innerHTML = "";
-  posts.forEach(post => {
-    const el = document.createElement("div");
-    el.className = "bg-white p-4 rounded shadow mb-3";
-    el.innerHTML = `
-      <div class="text-sm text-gray-500 mb-1">${post.user_email}</div>
-      <div class="text-base mb-2 break-words">${post.content}</div>
-      <div class="text-xs text-gray-400">${new Date(post.created_at).toLocaleString()}</div>
-    `;
-    feed.appendChild(el);
-  });
-}
-
-// Realtime
-function setupRealtime() {
-  client
-    .channel('public:posts')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
-      loadPosts(); // Podés optimizar para agregar solo el nuevo
-    })
-    .subscribe();
-}
-
-// Contador de caracteres
-function updateCharCount() {
-  if (charCount && newPostInput) {
-    charCount.innerText = `${newPostInput.value.length} / 280`;
-  }
-}
-
-newPostInput?.addEventListener("input", updateCharCount);
-
-// Al cargar la página
-checkSession();
+  <!-- Script principal -->
+  <script src="app.js"></script>
+</body>
+</html>
