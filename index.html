@@ -1,53 +1,134 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Asimi</title>
+// Configuración de Supabase
+const SUPABASE_URL = 'https://pbtezbxmrgbcgmunfpns.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // tu key completa aquí
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  <!-- Supabase v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+// Elementos del DOM
+const authSection = document.getElementById("auth-section");
+const postSection = document.getElementById("post-section");
+const feed = document.getElementById("feed");
+const newPostInput = document.getElementById("new-post");
+const charCount = document.getElementById("char-count");
+const authError = document.getElementById("auth-error");
 
-  <!-- App logic -->
-  <script defer src="app.js"></script>
-</head>
-<body class="bg-gray-100 text-gray-800">
+// Mostrar u ocultar secciones según sesión
+async function checkSession() {
+  const { data: { session } } = await client.auth.getSession();
 
-  <!-- Navbar -->
-  <header class="bg-white shadow-md p-4 sticky top-0 z-10">
-    <h1 class="text-xl font-bold text-center text-blue-600">Asimi</h1>
-  </header>
+  if (session && session.user) {
+    authSection.classList.add("hidden");
+    postSection.classList.remove("hidden");
+    loadPosts();
+    setupRealtime();
+  } else {
+    authSection.classList.remove("hidden");
+    postSection.classList.add("hidden");
+  }
+}
 
-  <!-- Main content -->
-  <main class="max-w-xl mx-auto mt-4 px-4">
+// Login
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-    <!-- Login / Registro -->
-    <div id="auth-section" class="mb-6">
-      <h2 class="text-lg font-semibold mb-2">Ingresar o Registrarse</h2>
-      <input id="email" type="email" placeholder="Email" class="w-full mb-2 px-3 py-2 border rounded" />
-      <input id="password" type="password" placeholder="Contraseña" class="w-full mb-2 px-3 py-2 border rounded" />
-      <div class="flex gap-2">
-        <button onclick="login()" class="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Login</button>
-        <button onclick="register()" class="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">Registro</button>
-      </div>
-      <p id="auth-error" class="text-red-500 mt-2 hidden"></p>
-    </div>
+  const { error } = await client.auth.signInWithPassword({ email, password });
 
-    <!-- Post form -->
-    <div id="post-section" class="mb-6 hidden">
-      <textarea id="new-post" maxlength="280" rows="3" placeholder="¿En qué estás pensando?" class="w-full p-2 border rounded resize-none"></textarea>
-      <div class="flex justify-between items-center mt-2">
-        <span id="char-count" class="text-sm text-gray-500">0 / 280</span>
-        <button onclick="createPost()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Publicar</button>
-      </div>
-    </div>
+  if (error) {
+    authError.innerText = "Login inválido: " + error.message;
+    authError.classList.remove("hidden");
+  } else {
+    authError.classList.add("hidden");
+    await checkSession();
+  }
+}
 
-    <!-- Feed -->
-    <section id="feed"></section>
+// Registro
+async function register() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  </main>
-</body>
-</html>
+  const { error } = await client.auth.signUp({ email, password });
+
+  if (error) {
+    authError.innerText = "Error en registro: " + error.message;
+  } else {
+    authError.innerText = "✅ Registrado. Revisa tu email para confirmar.";
+  }
+
+  authError.classList.remove("hidden");
+}
+
+// Publicar
+async function createPost() {
+  const content = newPostInput.value.trim();
+  if (!content) return;
+
+  const { data: { session } } = await client.auth.getSession();
+  const user = session?.user;
+  if (!user) return;
+
+  const { error } = await client.from("posts").insert([{
+    content,
+    user_id: user.id,
+    user_email: user.email
+  }]);
+
+  if (!error) {
+    newPostInput.value = "";
+    updateCharCount();
+    // Post se agrega automáticamente por realtime
+  }
+}
+
+// Cargar posts
+async function loadPosts() {
+  const { data: posts, error } = await client
+    .from("posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error al cargar posts:", error.message);
+    return;
+  }
+
+  renderFeed(posts);
+}
+
+// Mostrar posts en el DOM
+function renderFeed(posts) {
+  feed.innerHTML = "";
+  posts.forEach(post => {
+    const el = document.createElement("div");
+    el.className = "bg-white p-4 rounded shadow mb-3";
+    el.innerHTML = `
+      <div class="text-sm text-gray-500 mb-1">${post.user_email}</div>
+      <div class="text-base mb-2 break-words">${post.content}</div>
+      <div class="text-xs text-gray-400">${new Date(post.created_at).toLocaleString()}</div>
+    `;
+    feed.appendChild(el);
+  });
+}
+
+// Realtime
+function setupRealtime() {
+  client
+    .channel('public:posts')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
+      loadPosts(); // Podés optimizar para agregar solo el nuevo
+    })
+    .subscribe();
+}
+
+// Contador de caracteres
+function updateCharCount() {
+  if (charCount && newPostInput) {
+    charCount.innerText = `${newPostInput.value.length} / 280`;
+  }
+}
+
+newPostInput?.addEventListener("input", updateCharCount);
+
+// Al cargar la página
+checkSession();
