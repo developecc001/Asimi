@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Asimi</title>
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- App logic -->
   <script defer src="app.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -14,24 +21,24 @@
     <h1 class="text-xl font-bold text-center text-blue-600">Asimi</h1>
   </header>
 
-  <!-- Container -->
+  <!-- Main content -->
   <main class="max-w-xl mx-auto mt-4 px-4">
-    
+
     <!-- Login -->
-    <div id="login-section" class="mb-4">
+    <div id="login-section" class="mb-6">
       <h2 class="text-lg font-semibold mb-2">Iniciar sesión</h2>
       <input id="email" type="email" placeholder="Email" class="w-full mb-2 px-3 py-2 border rounded" />
       <input id="password" type="password" placeholder="Contraseña" class="w-full mb-2 px-3 py-2 border rounded" />
-      <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded">Login</button>
+      <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Login</button>
       <p id="login-error" class="text-red-500 mt-2 hidden"></p>
     </div>
 
-    <!-- Nuevo Tweet -->
+    <!-- Post form -->
     <div id="post-section" class="mb-6 hidden">
       <textarea id="new-post" maxlength="280" rows="3" placeholder="¿En qué estás pensando?" class="w-full p-2 border rounded resize-none"></textarea>
       <div class="flex justify-between items-center mt-2">
         <span id="char-count" class="text-sm text-gray-500">0 / 280</span>
-        <button onclick="createPost()" class="bg-blue-600 text-white px-4 py-2 rounded">Publicar</button>
+        <button onclick="createPost()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Publicar</button>
       </div>
     </div>
 
@@ -39,6 +46,5 @@
     <section id="feed"></section>
 
   </main>
-
 </body>
 </html>
