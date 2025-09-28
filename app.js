@@ -1,8 +1,7 @@
 // Inicializar Supabase
-const SUPABASE_URL = "https://pbtezbxmrgbcgmunfpns.supabase.co"; // ← cambiá por tu URL real si es otra
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidGV6YnhtcmdiY2dtdW5mcG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MzAyMDAsImV4cCI6MjA3NDUwNjIwMH0.OJotxjLi-7xnbIZat-JKQd-7bn5QMvqNsysPYU0GEsY";
-const { createClient } = supabase;
-const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = "https://TU_SUPABASE_URL.supabase.co"; // <-- reemplazá esto
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidGV6YnhtcmdiY2dtdW5mcG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MzAyMDAsImV4cCI6MjA3NDUwNjIwMH0.OJotxjLi-7xnbIZat-JKQd-7bn5QMvqNsysPYU0GEsY";         // <-- y esto
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Elementos del DOM
 const authSection = document.getElementById("auth-section");
@@ -11,6 +10,27 @@ const feed = document.getElementById("feed");
 const newPostInput = document.getElementById("new-post");
 const charCount = document.getElementById("char-count");
 const authError = document.getElementById("auth-error");
+
+// Detectar si viene desde el email de confirmación
+window.addEventListener("DOMContentLoaded", async () => {
+  const url = new URL(window.location.href);
+  const hashParams = new URLSearchParams(url.hash.substring(1));
+
+  const accessToken = hashParams.get("access_token");
+  const refreshToken = hashParams.get("refresh_token");
+  const type = hashParams.get("type");
+
+  if (accessToken && refreshToken && type === "signup") {
+    await client.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+
+    authSection.classList.add("hidden");
+    postSection.classList.remove("hidden");
+    loadPosts();
+  }
+});
 
 // Login
 async function login() {
@@ -55,18 +75,20 @@ async function createPost() {
   const user = session.data.session?.user;
   if (!user) return;
 
-  await client.from("posts").insert([{
-    content,
-    user_id: user.id,
-    user_email: user.email
-  }]);
+  await client.from("posts").insert([
+    {
+      content,
+      user_id: user.id,
+      user_email: user.email,
+    },
+  ]);
 
   newPostInput.value = "";
   updateCharCount();
   loadPosts();
 }
 
-// Mostrar feed
+// Cargar publicaciones
 async function loadPosts() {
   const { data: posts, error } = await client
     .from("posts")
@@ -76,7 +98,7 @@ async function loadPosts() {
   if (error) return console.error(error);
 
   feed.innerHTML = "";
-  posts.forEach(post => {
+  posts.forEach((post) => {
     const el = document.createElement("div");
     el.className = "bg-white p-4 rounded shadow mb-3";
     el.innerHTML = `
