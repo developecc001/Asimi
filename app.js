@@ -4,12 +4,12 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Elementos del DOM
-const loginSection = document.getElementById("login-section");
+const authSection = document.getElementById("auth-section");
 const postSection = document.getElementById("post-section");
 const feed = document.getElementById("feed");
 const newPostInput = document.getElementById("new-post");
 const charCount = document.getElementById("char-count");
-const loginError = document.getElementById("login-error");
+const authError = document.getElementById("auth-error");
 
 // Login
 async function login() {
@@ -22,12 +22,32 @@ async function login() {
   });
 
   if (error) {
-    loginError.innerText = "Login inválido";
-    loginError.classList.remove("hidden");
+    authError.innerText = "Login inválido";
+    authError.classList.remove("hidden");
   } else {
-    loginSection.classList.add("hidden");
+    authError.classList.add("hidden");
+    authSection.classList.add("hidden");
     postSection.classList.remove("hidden");
     loadPosts();
+  }
+}
+
+// Registro
+async function register() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { data, error } = await client.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    authError.innerText = "Error en registro: " + error.message;
+    authError.classList.remove("hidden");
+  } else {
+    authError.innerText = "✅ Registrado. Revisa tu email para confirmar.";
+    authError.classList.remove("hidden");
   }
 }
 

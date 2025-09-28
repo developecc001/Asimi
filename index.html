@@ -24,13 +24,16 @@
   <!-- Main content -->
   <main class="max-w-xl mx-auto mt-4 px-4">
 
-    <!-- Login -->
-    <div id="login-section" class="mb-6">
-      <h2 class="text-lg font-semibold mb-2">Iniciar sesión</h2>
+    <!-- Login / Registro -->
+    <div id="auth-section" class="mb-6">
+      <h2 class="text-lg font-semibold mb-2">Ingresar o Registrarse</h2>
       <input id="email" type="email" placeholder="Email" class="w-full mb-2 px-3 py-2 border rounded" />
       <input id="password" type="password" placeholder="Contraseña" class="w-full mb-2 px-3 py-2 border rounded" />
-      <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Login</button>
-      <p id="login-error" class="text-red-500 mt-2 hidden"></p>
+      <div class="flex gap-2">
+        <button onclick="login()" class="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Login</button>
+        <button onclick="register()" class="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">Registro</button>
+      </div>
+      <p id="auth-error" class="text-red-500 mt-2 hidden"></p>
     </div>
 
     <!-- Post form -->
