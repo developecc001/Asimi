@@ -1,7 +1,8 @@
 // Inicializar Supabase
-const SUPABASE_URL = "https://TU_SUPABASE_URL.supabase.co";
+const SUPABASE_URL = "https://pbtezbxmrgbcgmunfpns.supabase.co"; // ← cambiá por tu URL real si es otra
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidGV6YnhtcmdiY2dtdW5mcG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MzAyMDAsImV4cCI6MjA3NDUwNjIwMH0.OJotxjLi-7xnbIZat-JKQd-7bn5QMvqNsysPYU0GEsY";
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const { createClient } = supabase;
+const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Elementos del DOM
 const authSection = document.getElementById("auth-section");
@@ -16,10 +17,7 @@ async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await client.auth.signInWithPassword({
-    email,
-    password
-  });
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
 
   if (error) {
     authError.innerText = "Login inválido";
@@ -37,10 +35,7 @@ async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await client.auth.signUp({
-    email,
-    password
-  });
+  const { data, error } = await client.auth.signUp({ email, password });
 
   if (error) {
     authError.innerText = "Error en registro: " + error.message;
@@ -58,7 +53,6 @@ async function createPost() {
 
   const session = await client.auth.getSession();
   const user = session.data.session?.user;
-
   if (!user) return;
 
   await client.from("posts").insert([{
@@ -94,7 +88,7 @@ async function loadPosts() {
   });
 }
 
-// Contador caracteres
+// Contador de caracteres
 function updateCharCount() {
   charCount.innerText = `${newPostInput.value.length} / 280`;
 }
