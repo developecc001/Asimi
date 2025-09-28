@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Silver — Feed + Likes + Realtime + Avatares</title>
+  <link rel="stylesheet" href="styles.css" />
+  <body>
+    <h3>Silver</h3>
+
+    <div class="row mb">
+      <label>Email: <input id="email" value="TU_EMAIL@ejemplo.com" /></label>
+      <label>Password: <input id="password" type="password" value="TU_PASSWORD" /></label>
+    </div>
+
+    <div class="row mb">
+      <button id="login" class="btn">Login</button>
+      <button id="toggle" class="btn" disabled>Me gusta</button>
+      <button id="refresh" class="btn">Refrescar feed</button>
+      <span id="activeHint" class="pill" title="Post seleccionado">sin selección</span>
+      <label class="row right">
+        <input type="checkbox" id="debugToggle" />
+        <span>Modo debug</span>
+      </label>
+    </div>
+
+    <div class="row card gap">
+      <input id="commentText" placeholder="Escribí un comentario..." size="40" />
+      <button id="addComment" class="btn" disabled>Agregar comentario</button>
+      <button id="listComments" class="btn" disabled>Ver últimos comentarios</button>
+    </div>
+
+    <div class="row card gap mt">
+      <input id="avatarFile" type="file" accept="image/*" />
+      <button id="uploadAvatar" class="btn">Subir avatar</button>
+      <button id="showAvatar" class="btn">Ver avatar</button>
+    </div>
+
+    <div id="feedUI" class="feed"></div>
+    <div id="commentsUI" class="commentList"></div>
+
+    <div id="debugWrap"><pre id="out"></pre></div>
+    <div id="toasts"></div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

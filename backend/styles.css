@@ -1,0 +1,35 @@
+:root {
+  --bg:#0f0f12; --fg:#eaeaf0; --muted:#b9b9c9;
+  --surface:#15151c; --border:#2a2a35; --surface-2:#1b1b24;
+  --accent:#6a6afc; --ok:#2f7b42; --err:#8b2c2c;
+}
+* { box-sizing: border-box; }
+body{background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px}
+h3{margin:0 0 16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.mb{margin-bottom:8px}
+.mt{margin-top:12px}
+.right{margin-left:auto}
+.gap{gap:8px}
+.btn{background:#2a2a35;border:1px solid #3a3a48;color:var(--fg);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn:hover{background:#323244}
+input[type="text"],input[type="password"],input[type="file"]{
+  background:var(--surface);border:1px solid #2f2f3c;color:var(--fg);border-radius:10px;padding:8px
+}
+.card{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:14px;transition:border-color .15s,box-shadow .15s}
+.card.selectable{cursor:pointer}
+.card.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,106,252,.15)}
+.feed{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.commentList{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#3c3c4f}
+.avatar-s{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#3c3c4f}
+.meta{opacity:.7;font-size:12px}
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.toast{background:var(--surface-2);border:1px solid #343449;color:var(--fg);padding:10px 12px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{border-color:var(--ok)}
+.toast.err{border-color:var(--err)}
+#debugWrap{display:none;margin-top:12px}
+pre{background:#111117;color:var(--muted);padding:10px;border-radius:10px;min-height:120px;border:1px solid var(--border);white-space:pre-wrap}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#222233;border:1px solid #343449;margin-left:8px}
