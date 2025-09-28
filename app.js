@@ -1,5 +1,5 @@
 // Inicializar Supabase
-const SUPABASE_URL = "https://TU_SUPABASE_URL.supabase.co"; // <-- reemplazá esto
+const SUPABASE_URL = "https://developecc001.github.io/Asimi/"; // <-- reemplazá esto
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidGV6YnhtcmdiY2dtdW5mcG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MzAyMDAsImV4cCI6MjA3NDUwNjIwMH0.OJotxjLi-7xnbIZat-JKQd-7bn5QMvqNsysPYU0GEsY";         // <-- y esto
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
